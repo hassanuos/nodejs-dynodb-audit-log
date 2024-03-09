@@ -27,4 +27,4 @@ class CreateTable {
     }
 }
 
-module.exports = CreateTable
+module.exports = CreateTable;

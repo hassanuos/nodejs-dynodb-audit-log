@@ -409,6 +409,3 @@ dynamodbWrapper.getItem('ref_id', recordId, tableName)
   .catch(err => {
     console.error('Error:', err);
   });
-
-
-// dynamodbWrapper.allItems(tableName);
