@@ -41,12 +41,17 @@ function compareJSONNew(obj1, obj2) {
 
     // Compare each key-value pair recursively
     for (let key of obj1Keys) {
-        const { oldChanges: oldVal, newChanges: newVal } = compareJSONNew(obj1[key], obj2[key]);
-        if (Object.keys(oldVal).length !== 0) {
-            oldChanges[key] = oldVal;
-        }
-        if (Object.keys(newVal).length !== 0) {
-            newChanges[key] = newVal;
+        if (typeof obj1[key] === 'boolean' && typeof obj2[key] === 'boolean' && obj1[key] !== obj2[key]) {
+            oldChanges[key] = obj1[key];
+            newChanges[key] = obj2[key];
+        } else {
+            const { oldChanges: oldVal, newChanges: newVal } = compareJSONNew(obj1[key], obj2[key]);
+            if (Object.keys(oldVal).length !== 0) {
+                oldChanges[key] = oldVal;
+            }
+            if (Object.keys(newVal).length !== 0) {
+                newChanges[key] = newVal;
+            }
         }
     }
 
