@@ -3,6 +3,7 @@ const DynamoDBWrapper = require('./DynamoDBWrapper');
 const CreateTable = require('./CreateTable');
 const compareJSON = require('./compareJSON');
 const getCurrentDateTime = require('./currentDateTime');
+const compareJSONNew = require('./compareJSONNew');
 
 const config = {
     
@@ -23,7 +24,7 @@ const tableName = 'audit-logs';
 const response = {
 	data:{
 		id: 11111,
-        name: 'Ass Broadband',
+        name: 'Ass Broadband abc',
         city: 'Log Angles',
         state: 'LA',
         zip: '89169',
@@ -41,21 +42,21 @@ const response = {
         incorporationInformation: [
 			{
 				stateOfIncorporation: 'qS',
-                countryOfIncorporation: 'Uqa',
-                yearOfIncorporation: '20220'
+                countryOfIncorporation: 'qSA',
+                yearOfIncorporation: '20440'
             }
         ],
         companyInsiders: [
 			{
-				firstName: "Ma2rilyn",
+				firstName: "Hassan",
                 middleName: "",
-                lastName: "Ka2ne",
+                lastName: "Raza",
                 corpEntity: "Au2tomated Retail Leasing Partners LP"
             },
             {
-				firstName: "Marilyn 1",
+				firstName: "Rizwan",
 				middleName: "",
-				lastName: "Kane1",
+				lastName: "Khan",
 				corpEntity: "Automated Retail Leasing Partners LP"
             }
 		],
@@ -67,7 +68,7 @@ const response = {
 				name: "Craig Steven Alford",
                 firstName: "Craig",
                 middleName: "Steven",
-                lastName: "Alford",
+                lastName: "Carter",
                 title: "Director",
                 boards: "Compensation Committee Member, Nominating Committee Member",
                 biography: "Mr. Alford holds both an Honors Bachelor of Science and a Master's Degree in Science and is a registered Professional Geoscientist. Mr. Alford has wide-ranging project and business development experience, having worked throughout North and South America, Central Asia, Australia, Africa, Russia and China. His experience has included work on the exploration, operations and the analysis of both conventional energy and new energy projects for several junior and major multinational companies. Mr. Alford has played key roles in raising equity for new projects and developing comprehensive economic analysis for billion-dollar M&A transactions.",
@@ -117,10 +118,10 @@ const response = {
         isNonBankRegulated: false,
         isInternationalReporting: false,
         isOtherReporting: false,
-        auditedStatusDisplay: 'Unaudited',
+        auditedStatusDisplay: 'Audited',
         auditStatus: 'U',
         audited: false,
-        email: 'ir@asiabroadbandinc.com',
+        email: 'tr@asiabroadbandinc.com',
         numberOfEmployees: 16,
         numberOfEmployeesAsOf: 1703998800000,
         roundLotShareholders: 2000,
@@ -374,10 +375,12 @@ dynamodbWrapper.getItem('ref_id', recordId, tableName)
       };
       dynamodbWrapper.createItem(itemToCreate, 'audit-logs');
     } else {
-      const oldEntry = JSON.parse(parsedData[0].new_value.S);
+      // sort items by desending
+      parsedData.sort((a, b) => new Date(b.new_date.S) - new Date(a.new_date.S));
+      const oldEntry = (parsedData.length > 1) ? JSON.parse(parsedData[0].latest_object.S) : JSON.parse(parsedData[0].new_value.S);
       const newEntry = response.data;
-      const differences = compareJSON(oldEntry, newEntry);
-      if (!dynamodbWrapper.isEmptyObject(differences)) {
+      const {oldChanges, newChanges} = compareJSONNew(oldEntry, newEntry);
+      if (!dynamodbWrapper.isEmptyObject(oldChanges) && !dynamodbWrapper.isEmptyObject(newChanges)) {
         const itemId = parsedData[0].id.S;
         const attributeName = 'entry_status';
         const attributeValue = '0';
@@ -385,10 +388,10 @@ dynamodbWrapper.getItem('ref_id', recordId, tableName)
         dynamodbWrapper.updateItem(itemId, attributeName, attributeValue, tableName)
           .then(updatedItem => {
             console.log(updatedItem);
-          });
+        });
 
-        const old_log = JSON.stringify(oldEntry);
-        const new_log = JSON.stringify(newEntry);
+        const old_log = JSON.stringify(oldChanges);
+        const new_log = JSON.stringify(newChanges);
         const old_date = parsedData[0].new_date.S;
         const new_date = getCurrentDateTime();
 
@@ -397,6 +400,7 @@ dynamodbWrapper.getItem('ref_id', recordId, tableName)
           ref_id: recordId,
           old_value: old_log,
           new_value: new_log,
+          latest_object:JSON.stringify(response.data),
           old_date: old_date,
           new_date: new_date,
           entry_status: '1',
@@ -409,3 +413,11 @@ dynamodbWrapper.getItem('ref_id', recordId, tableName)
   .catch(err => {
     console.error('Error:', err);
   });
+
+// dynamodbWrapper.deleteItem('id', '471809', tableName); 
+// dynamodbWrapper.allItems(tableName);
+
+// dynamodbWrapper.getItem('ref_id', '11111', tableName)
+//   .then(parsedData => {
+//     console.log(parsedData);
+// })

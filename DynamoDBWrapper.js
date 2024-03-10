@@ -39,6 +39,7 @@ class DynamoDBWrapper {
     
         try{
             const { Items = [] }  = await this.dynamodbQuery.scan(params).promise();
+            Items.sort((a, b) => new Date(b.new_date.S) - new Date(a.new_date.S))
             console.log( Items );
     
         } catch(error){

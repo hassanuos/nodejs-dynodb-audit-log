@@ -12,7 +12,9 @@ function getCurrentDateTime(){
     const minutes = padWithZero(currentDateTime.getMinutes());
     const seconds = padWithZero(currentDateTime.getSeconds());
     
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+    return formattedDateTime;
 }
 
 
