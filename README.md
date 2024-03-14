@@ -7,12 +7,35 @@ This script is designed to store updated logs or audit trails. When a change occ
 {
   "id": "345678",
   "ref_id": "11111",
-  "old_value": `{}`,
-  "new_value": `{}`,
+  "latest_object": `{<full object>}`,
+  "old_value": `{<last changed key values>}`, 
+  "new_value": `{<recent changed keys values>}`,
   "new_date": "Y-m-d H:i:s",
   "old_date": "Y-m-d H:i:s",
   "entry_status": "1|0",
 }
+```
+
+#### AWS DynamoDB CLI Commands:
+
+```console
+Run dynmodb database server on local host
+foo@bar:~$ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
+
+List all tables available in the database
+foo@bar:~$ aws dynamodb list-tables --endpoint-url http://localhost:8000
+
+Delete single table from the tdatabase
+foo@bar:~$ aws dynamodb delete-table --table-name audit-logs --endpoint-url http://localhost:8000
+
+#Create Table
+foo@bar:~$ aws dynamodb create-table --table-name jjjj --attribute-definitions AttributeName=Artist,AttributeType=S AttributeName=SongTitle,AttributeType=S --key-schema AttributeName=Artist,KeyType=HASH AttributeName=SongTitle,KeyType=RANGE --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --endpoint-url http://localhost:8000
+
+#Insert Items to the table
+foo@bar:~$ aws dynamodb put-item --table-name jjjj --item "{\"Artist\": {\"S\": \"Acme Band\"}, \"SongTitle\": {\"S\": \"Happy Day\"}, \"AlbumTitle\": {\"S\": \"Somewhat Famous\"}, \"Awards\": {\"N\": \"1\"}}" --endpoint-url http://localhost:8000
+
+#Get Items from the table
+foo@bar:~$ aws dynamodb get-item --consistent-read --table-name jjjj --key "{\"Artist\": {\"S\": \"Acme Band\"}, \"SongTitle\": {\"S\": \"Happy Day\"}}" --endpoint-url http://localhost:8000
 ```
 
 #### Example:
